@@ -1,6 +1,6 @@
 {
   "name": "copy-path",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Adds context menu actions for copying the vault or full paths of files and folders.",
   "keywords": [],
   "license": "MIT",
