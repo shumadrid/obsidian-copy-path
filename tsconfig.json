@@ -13,7 +13,7 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "noEmit": true,
-    "skipLibCheck": false,
+    "skipLibCheck": true,
     "target": "ES2024",
     "types": ["node", "obsidian-typings", "svelte"],
     "verbatimModuleSyntax": true
