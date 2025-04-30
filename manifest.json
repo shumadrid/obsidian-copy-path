@@ -1,0 +1,9 @@
+{
+  "author": "shumadrid",
+  "authorUrl": "https://github.com/shumadrid/",
+  "description": "Adds context menu actions for copying the vault or full paths of files and folders.",
+  "id": "copy-path",
+  "isDesktopOnly": false,
+  "name": "Copy Path",
+  "version": "0.0.0"
+}
