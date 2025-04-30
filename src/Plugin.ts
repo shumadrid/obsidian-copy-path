@@ -1,16 +1,20 @@
-import { Notice, type TAbstractFile } from 'obsidian';
+import type { TAbstractFile } from 'obsidian';
+
+import { Notice } from 'obsidian';
 import { PluginBase } from 'obsidian-dev-utils/obsidian/Plugin/PluginBase';
-import { CopyPathPluginSettingsManager } from './PluginSettingsManager.ts';
-import { CopyPathPluginSettingsTab } from './PluginSettingsTab.ts';
+
 import type { CopyPathPluginTypes } from './PluginTypes.ts';
 
-export class CopyPathPlugin extends PluginBase<CopyPathPluginTypes> {
-  protected override createSettingsTab(): CopyPathPluginSettingsTab {
-    return new CopyPathPluginSettingsTab(this);
-  }
+import { CopyPathPluginSettingsManager } from './PluginSettingsManager.ts';
+import { CopyPathPluginSettingsTab } from './PluginSettingsTab.ts';
 
+export class CopyPathPlugin extends PluginBase<CopyPathPluginTypes> {
   protected override createSettingsManager(): CopyPathPluginSettingsManager {
     return new CopyPathPluginSettingsManager(this);
+  }
+
+  protected override createSettingsTab(): CopyPathPluginSettingsTab {
+    return new CopyPathPluginSettingsTab(this);
   }
 
   protected override async onloadImpl(): Promise<void> {
@@ -18,6 +22,24 @@ export class CopyPathPlugin extends PluginBase<CopyPathPluginTypes> {
 
     registerContextMenuItems(this);
   }
+}
+
+async function copyFullPath(
+  file: TAbstractFile,
+  plugin: CopyPathPlugin
+): Promise<void> {
+  const absolutePath = plugin.app.vault.adapter.getFullRealPath(file.path);
+  await navigator.clipboard.writeText(absolutePath);
+  // eslint-disable-next-line no-magic-numbers
+  new Notice(`Copied full path:\n${absolutePath}`, 2000);
+}
+
+// Is normalized.
+async function copyVaultPath(file: TAbstractFile): Promise<void> {
+  const vaultPath = file.path;
+  await navigator.clipboard.writeText(vaultPath);
+  // eslint-disable-next-line no-magic-numbers
+  new Notice(`Copied vault path:\n${vaultPath}`, 2000);
 }
 
 function registerContextMenuItems(plugin: CopyPathPlugin): void {
@@ -30,9 +52,11 @@ function registerContextMenuItems(plugin: CopyPathPlugin): void {
       menu.addItem((item) => {
         item
           .setSection('info')
-          .setTitle(`Copy vault path`)
+          .setTitle('Copy vault path')
           .setIcon('copy')
-          .onClick(() => copyVaultPath(file));
+          .onClick(async () => {
+            await copyVaultPath(file);
+          });
       });
     })
   );
@@ -46,23 +70,12 @@ function registerContextMenuItems(plugin: CopyPathPlugin): void {
       menu.addItem((item) => {
         item
           .setSection('info')
-          .setTitle(`Copy full path`)
+          .setTitle('Copy full path')
           .setIcon('copy')
-          .onClick(() => copyFullPath(file, plugin));
+          .onClick(async () => {
+            await copyFullPath(file, plugin);
+          });
       });
     })
   );
-}
-
-// Is normalized.
-function copyVaultPath(file: TAbstractFile): void {
-  const vaultPath = file.path;
-  navigator.clipboard.writeText(vaultPath);
-  new Notice(`Copied vault path:\n${vaultPath}`, 2000);
-}
-
-function copyFullPath(file: TAbstractFile, plugin: CopyPathPlugin): void {
-  const absolutePath = plugin.app.vault.adapter.getFullRealPath(file.path);
-  navigator.clipboard.writeText(absolutePath);
-  new Notice(`Copied full path:\n${absolutePath}`, 2000);
 }
