@@ -1,6 +1,6 @@
 # Copy Path
 
-This is a simple plugin for [Obsidian](https://obsidian.md/) that adds context menu actions for copying the vault or full paths of files and folders.
+This is a simple plugin for [Obsidian](https://obsidian.md/) that adds context menu actions for copying the full or vault relative paths of files and folders.
 
 ## Installation
 
