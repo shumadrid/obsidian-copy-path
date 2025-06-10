@@ -18,7 +18,3 @@ To install the latest release of this plugin, follow these steps:
 - **"Copy full path" context menu action**: Show the option to copy the full path of a file or folder.
 
 You can toggle these settings in the plugin's settings tab.
-
-## License
-
-© [shumadrid](https://github.com/shumadrid/)
