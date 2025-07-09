@@ -16,5 +16,6 @@ To install the latest release of this plugin, follow these steps:
 
 - **"Copy vault path" context menu action**: Show the option to copy the vault path of a file or folder.
 - **"Copy full path" context menu action**: Show the option to copy the full path of a file or folder.
+- **"Add trailing slash to folder paths"**: When enabled, folder paths will end with a trailing slash (e.g., `folder/`) to distinguish them from files. This applies to both vault and full path copying.
 
 You can toggle these settings in the plugin's settings tab.

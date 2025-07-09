@@ -19,5 +19,12 @@ export class CopyPathPluginSettingsTab extends PluginSettingsTabBase<CopyPathPlu
       .addToggle((toggle) => {
         this.bind(toggle, 'copyFullPathContextItem');
       });
+
+    new SettingEx(this.containerEl)
+      .setName('Add trailing slash to folder paths')
+      .setDesc('When copying folder paths, append a trailing slash to distinguish them from files')
+      .addToggle((toggle) => {
+        this.bind(toggle, 'addTrailingSlashToFolders');
+      });
   }
 }

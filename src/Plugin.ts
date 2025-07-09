@@ -1,6 +1,9 @@
 import type { TAbstractFile } from 'obsidian';
 
-import { Notice } from 'obsidian';
+import {
+  Notice,
+  TFolder
+} from 'obsidian';
 import { PluginBase } from 'obsidian-dev-utils/obsidian/Plugin/PluginBase';
 
 import type { CopyPathPluginTypes } from './PluginTypes.ts';
@@ -29,7 +32,7 @@ export class CopyPathPlugin extends PluginBase<CopyPathPluginTypes> {
               .setTitle('Copy vault path')
               .setIcon('copy')
               .onClick(async () => {
-                await copyVaultPath(file);
+                await copyVaultPath(file, this);
               });
           });
         }
@@ -54,15 +57,28 @@ async function copyFullPath(
   file: TAbstractFile,
   plugin: CopyPathPlugin
 ): Promise<void> {
-  const absolutePath = plugin.app.vault.adapter.getFullRealPath(file.path);
+  let absolutePath = plugin.app.vault.adapter.getFullRealPath(file.path);
+
+  if (file instanceof TFolder && plugin.settings.addTrailingSlashToFolders) {
+    absolutePath += '/';
+  }
+
   await navigator.clipboard.writeText(absolutePath);
   // eslint-disable-next-line no-magic-numbers
   new Notice(`Copied full path:\n${absolutePath}`, 2000);
 }
 
 // Is normalized.
-async function copyVaultPath(file: TAbstractFile): Promise<void> {
-  const vaultPath = file.path;
+async function copyVaultPath(
+  file: TAbstractFile,
+  plugin: CopyPathPlugin
+): Promise<void> {
+  let vaultPath = file.path;
+
+  if (file instanceof TFolder && plugin.settings.addTrailingSlashToFolders) {
+    vaultPath += '/';
+  }
+
   await navigator.clipboard.writeText(vaultPath);
   // eslint-disable-next-line no-magic-numbers
   new Notice(`Copied vault path:\n${vaultPath}`, 2000);
