@@ -58,7 +58,7 @@ export class CopyPathPlugin extends PluginBase<CopyPathPluginTypes> {
           await copyVaultPath(targetFile, this);
         },
         id: 'copy-vault-path',
-        name: 'Copy vault path'
+        name: 'Copy Path: Copy vault path for current file'
       });
     }
 
@@ -69,7 +69,7 @@ export class CopyPathPlugin extends PluginBase<CopyPathPluginTypes> {
           await copyFullPath(targetFile, this);
         },
         id: 'copy-full-path',
-        name: 'Copy full path'
+        name: 'Copy Path: Copy full path for current file'
       });
     }
   }
