@@ -74,19 +74,28 @@ export class CopyPathPlugin extends PluginBase<CopyPathPluginTypes> {
     }
   }
 
-  private getTargetFileForCommand(): TAbstractFile {
-    // Priority 1: Active file in editor
+  private getFileFallback(): TAbstractFile {
+    // First try active file
     const activeFile = this.app.workspace.getActiveFile();
     if (activeFile) {
       return activeFile;
     }
 
-    // Priority 2: Selected file in file explorer (with defensive checks)
+    // Try to get selected file as secondary fallback
+    const selectedFile = this.getSelectedFileFromExplorer();
+    if (selectedFile) {
+      return selectedFile;
+    }
+
+    // Final fallback: vault root
+    return this.app.vault.getRoot();
+  }
+
+  private getSelectedFileFromExplorer(): null | TAbstractFile {
     try {
       const fileExplorerLeaves = this.app.workspace.getLeavesOfType('file-explorer');
       if (fileExplorerLeaves.length > 0 && fileExplorerLeaves[0]) {
         const fileExplorerView = fileExplorerLeaves[0].view as unknown;
-        // Access with defensive checks using optional chaining
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
         const selectedFile = (fileExplorerView as any)?.tree?.selectedDom?.file;
         if (selectedFile && selectedFile instanceof TAbstractFile) {
@@ -94,12 +103,45 @@ export class CopyPathPlugin extends PluginBase<CopyPathPluginTypes> {
         }
       }
     } catch (error) {
-      // Log error but continue with fallback
       console.warn('Failed to access file explorer selection:', error);
     }
+    return null;
+  }
 
-    // Priority 3: Vault root fallback
-    return this.app.vault.getRoot();
+  /**
+   * Determines the target file for command execution based on focus:
+   * 1. If file explorer has focus → use selected file/folder
+   * 2. If editor has focus → use active file
+   * 3. Fallback to vault root if neither
+   */
+  private getTargetFileForCommand(): TAbstractFile {
+    // Get the currently focused element
+    const activeElement = document.activeElement;
+
+    // Check if file explorer has focus
+    const hasFileExplorerFocus = activeElement?.closest('.nav-files-container, .workspace-leaf-content[data-type="file-explorer"]');
+
+    if (hasFileExplorerFocus) {
+      // File explorer has focus - use selected file/folder
+      const selectedFile = this.getSelectedFileFromExplorer();
+      if (selectedFile) {
+        return selectedFile;
+      }
+    }
+
+    // Check if editor has focus
+    const hasEditorFocus = activeElement?.closest('.markdown-source-view, .markdown-preview-view, .workspace-leaf-content[data-type="markdown"]');
+
+    if (hasEditorFocus) {
+      // Editor has focus - use active file
+      const activeFile = this.app.workspace.getActiveFile();
+      if (activeFile) {
+        return activeFile;
+      }
+    }
+
+    // Neither has clear focus - try intelligent fallback
+    return this.getFileFallback();
   }
 }
 
