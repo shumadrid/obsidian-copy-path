@@ -52,43 +52,43 @@ export class CopyPathPlugin extends PluginBase<CopyPathPluginTypes> {
       })
     );
 
-      this.addCommand({
-  checkCallback: (checking: boolean) => {
-    const activeFile = this.getActiveFile();
+    this.addCommand({
+      checkCallback: (checking: boolean) => {
+        const activeFile = this.getActiveFile();
 
-    if (activeFile) {
-      if (!checking) {
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        copyVaultPath(activeFile, this);
-      }
+        if (activeFile) {
+          if (!checking) {
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
+            copyVaultPath(activeFile, this);
+          }
 
-      return true;
-    }
+          return true;
+        }
 
-    return false;
-  },
-  id: 'copy-vault-path',
-  name: 'Copy vault path of focused item'
-});
+        return false;
+      },
+      id: 'copy-vault-path',
+      name: 'Copy vault path of focused item'
+    });
 
- this.addCommand({
-  checkCallback: (checking: boolean) => {
-    const activeFile = this.getActiveFile();
+    this.addCommand({
+      checkCallback: (checking: boolean) => {
+        const activeFile = this.getActiveFile();
 
-    if (activeFile) {
-      if (!checking) {
-                 // eslint-disable-next-line @typescript-eslint/no-floating-promises
-                 copyFullPath(activeFile, this);
-      }
+        if (activeFile) {
+          if (!checking) {
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
+            copyFullPath(activeFile, this);
+          }
 
-      return true;
-    }
+          return true;
+        }
 
-    return false;
-  },
-  id: 'copy-full-path',
-  name: 'Copy full path of focused item'
-});
+        return false;
+      },
+      id: 'copy-full-path',
+      name: 'Copy full path of focused item'
+    });
   }
 
   private getActiveFile(): null | TFile {
