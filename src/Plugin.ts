@@ -1,7 +1,6 @@
-import type { TAbstractFile } from 'obsidian';
-
 import {
   Notice,
+  TAbstractFile,
   TFolder
 } from 'obsidian';
 import { PluginBase } from 'obsidian-dev-utils/obsidian/Plugin/PluginBase';
@@ -50,6 +49,99 @@ export class CopyPathPlugin extends PluginBase<CopyPathPluginTypes> {
         }
       })
     );
+
+    // Register commands for hotkey mapping
+    if (this.settings.copyVaultPathContextItem) {
+      this.addCommand({
+        callback: async () => {
+          const targetFile = this.getTargetFileForCommand();
+          await copyVaultPath(targetFile, this);
+        },
+        id: 'copy-vault-path',
+        name: 'Copy Path: Copy vault path for current file'
+      });
+    }
+
+    if (this.settings.copyFullPathContextItem) {
+      this.addCommand({
+        callback: async () => {
+          const targetFile = this.getTargetFileForCommand();
+          await copyFullPath(targetFile, this);
+        },
+        id: 'copy-full-path',
+        name: 'Copy Path: Copy full path for current file'
+      });
+    }
+  }
+
+  private getFileFallback(): TAbstractFile {
+    // First try active file
+    const activeFile = this.app.workspace.getActiveFile();
+    if (activeFile) {
+      return activeFile;
+    }
+
+    // Try to get selected file as secondary fallback
+    const selectedFile = this.getSelectedFileFromExplorer();
+    if (selectedFile) {
+      return selectedFile;
+    }
+
+    // Final fallback: vault root
+    return this.app.vault.getRoot();
+  }
+
+  private getSelectedFileFromExplorer(): null | TAbstractFile {
+    try {
+      const fileExplorerLeaves = this.app.workspace.getLeavesOfType('file-explorer');
+      if (fileExplorerLeaves.length > 0 && fileExplorerLeaves[0]) {
+        const fileExplorerView = fileExplorerLeaves[0].view as unknown;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+        const selectedFile = (fileExplorerView as any)?.tree?.selectedDom?.file;
+        if (selectedFile && selectedFile instanceof TAbstractFile) {
+          return selectedFile;
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to access file explorer selection:', error);
+    }
+    return null;
+  }
+
+  /**
+   * Determines the target file for command execution based on focus:
+   * 1. If file explorer has focus → use selected file/folder
+   * 2. If editor has focus → use active file
+   * 3. Fallback to vault root if neither
+   */
+  private getTargetFileForCommand(): TAbstractFile {
+    // Get the currently focused element
+    const activeElement = document.activeElement;
+
+    // Check if file explorer has focus
+    const hasFileExplorerFocus = activeElement?.closest('.nav-files-container, .workspace-leaf-content[data-type="file-explorer"]');
+
+    if (hasFileExplorerFocus) {
+      // File explorer has focus - use selected file/folder
+      const selectedFile = this.getSelectedFileFromExplorer();
+      if (selectedFile) {
+        return selectedFile;
+      }
+    }
+
+    // Check if editor has focus
+    const hasEditorFocus = activeElement?.closest('.markdown-source-view, .markdown-preview-view, .workspace-leaf-content[data-type="markdown"]');
+
+    if (hasEditorFocus) {
+      // Editor has focus - use active file
+      const activeFile = this.app.workspace.getActiveFile();
+      if (activeFile) {
+        return activeFile;
+      }
+    }
+
+    // Neither has clear focus - try intelligent fallback
+    return this.getFileFallback();
   }
 }
 
@@ -64,8 +156,12 @@ async function copyFullPath(
   }
 
   await navigator.clipboard.writeText(absolutePath);
+
+  // Enhanced notice with source indication
+  const isVaultRoot = file === plugin.app.vault.getRoot();
+  const sourceIndicator = isVaultRoot ? ' (vault root)' : '';
   // eslint-disable-next-line no-magic-numbers
-  new Notice(`Copied full path:\n${absolutePath}`, 2000);
+  new Notice(`Copied full path${sourceIndicator}:\n${absolutePath}`, 2000);
 }
 
 // Is normalized.
@@ -80,6 +176,10 @@ async function copyVaultPath(
   }
 
   await navigator.clipboard.writeText(vaultPath);
+
+  // Enhanced notice with source indication
+  const isVaultRoot = file === plugin.app.vault.getRoot();
+  const sourceIndicator = isVaultRoot ? ' (vault root)' : '';
   // eslint-disable-next-line no-magic-numbers
-  new Notice(`Copied vault path:\n${vaultPath}`, 2000);
+  new Notice(`Copied vault path${sourceIndicator}:\n${vaultPath}`, 2000);
 }
