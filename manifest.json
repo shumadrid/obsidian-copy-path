@@ -5,6 +5,6 @@
   "id": "copy-path",
   "isDesktopOnly": false,
   "name": "Copy Path",
-  "version": "0.3.1",
+  "version": "0.3.0",
   "minAppVersion": "1.8.10"
 }
