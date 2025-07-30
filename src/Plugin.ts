@@ -1,6 +1,8 @@
 import {
+  FileView,
   Notice,
   TAbstractFile,
+  TFile,
   TFolder
 } from 'obsidian';
 import { PluginBase } from 'obsidian-dev-utils/obsidian/Plugin/PluginBase';
@@ -50,98 +52,52 @@ export class CopyPathPlugin extends PluginBase<CopyPathPluginTypes> {
       })
     );
 
-    // Register commands for hotkey mapping
-    if (this.settings.copyVaultPathContextItem) {
       this.addCommand({
-        callback: async () => {
-          const targetFile = this.getTargetFileForCommand();
-          await copyVaultPath(targetFile, this);
-        },
-        id: 'copy-vault-path',
-        name: 'Copy vault path of focused item'
-      });
-    }
+  checkCallback: (checking: boolean) => {
+    const activeFile = this.getActiveFile();
 
-    if (this.settings.copyFullPathContextItem) {
-      this.addCommand({
-        callback: async () => {
-          const targetFile = this.getTargetFileForCommand();
-          await copyFullPath(targetFile, this);
-        },
-        id: 'copy-full-path',
-        name: 'Copy full path of focused item'
-      });
-    }
-  }
-
-  private getFileFallback(): TAbstractFile {
-    // First try active file
-    const activeFile = this.app.workspace.getActiveFile();
     if (activeFile) {
-      return activeFile;
+      if (!checking) {
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        copyVaultPath(activeFile, this);
+      }
+
+      return true;
     }
 
-    // Try to get selected file as secondary fallback
-    const selectedFile = this.getSelectedFileFromExplorer();
-    if (selectedFile) {
-      return selectedFile;
+    return false;
+  },
+  id: 'copy-vault-path',
+  name: 'Copy vault path of focused item'
+});
+
+ this.addCommand({
+  checkCallback: (checking: boolean) => {
+    const activeFile = this.getActiveFile();
+
+    if (activeFile) {
+      if (!checking) {
+                 // eslint-disable-next-line @typescript-eslint/no-floating-promises
+                 copyFullPath(activeFile, this);
+      }
+
+      return true;
     }
 
-    // Final fallback: vault root
-    return this.app.vault.getRoot();
+    return false;
+  },
+  id: 'copy-full-path',
+  name: 'Copy full path of focused item'
+});
   }
 
-  private getSelectedFileFromExplorer(): null | TAbstractFile {
-    try {
-      const fileExplorerLeaves = this.app.workspace.getLeavesOfType('file-explorer');
-      if (fileExplorerLeaves.length > 0 && fileExplorerLeaves[0]) {
-        const fileExplorerView = fileExplorerLeaves[0].view as unknown;
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-        const selectedFile = (fileExplorerView as any)?.tree?.selectedDom?.file;
-        if (selectedFile && selectedFile instanceof TAbstractFile) {
-          return selectedFile;
-        }
-      }
-    } catch (error) {
-      console.warn('Failed to access file explorer selection:', error);
+  private getActiveFile(): null | TFile {
+    // First try active file
+    const activeFileView = this.app.workspace.getActiveViewOfType(FileView);
+    if (activeFileView) {
+      return activeFileView.file;
     }
     return null;
-  }
-
-  /**
-   * Determines the target file for command execution based on focus:
-   * 1. If file explorer has focus → use selected file/folder
-   * 2. If editor has focus → use active file
-   * 3. Fallback to vault root if neither
-   */
-  private getTargetFileForCommand(): TAbstractFile {
-    // Get the currently focused element
-    const activeElement = document.activeElement;
-
-    // Check if file explorer has focus
-    const hasFileExplorerFocus = activeElement?.closest('.nav-files-container, .workspace-leaf-content[data-type="file-explorer"]');
-
-    if (hasFileExplorerFocus) {
-      // File explorer has focus - use selected file/folder
-      const selectedFile = this.getSelectedFileFromExplorer();
-      if (selectedFile) {
-        return selectedFile;
-      }
-    }
-
-    // Check if editor has focus
-    const hasEditorFocus = activeElement?.closest('.markdown-source-view, .markdown-preview-view, .workspace-leaf-content[data-type="markdown"]');
-
-    if (hasEditorFocus) {
-      // Editor has focus - use active file
-      const activeFile = this.app.workspace.getActiveFile();
-      if (activeFile) {
-        return activeFile;
-      }
-    }
-
-    // Neither has clear focus - try intelligent fallback
-    return this.getFileFallback();
   }
 }
 
