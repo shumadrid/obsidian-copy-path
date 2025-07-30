@@ -1,10 +1,10 @@
 {
   "author": "shumadrid",
   "authorUrl": "https://github.com/shumadrid/",
-  "description": "Adds context menu actions and commands for copying the full/vault-relative path of files and folders. Commands can be assigned hotkeys.",
+  "description": "Adds context menu actions for copying the full/vault-relative path of files and folders.",
   "id": "copy-path",
   "isDesktopOnly": false,
   "name": "Copy Path",
-  "version": "0.3.0",
+  "version": "0.2.0",
   "minAppVersion": "1.8.10"
 }

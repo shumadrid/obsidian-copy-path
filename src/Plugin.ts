@@ -58,7 +58,7 @@ export class CopyPathPlugin extends PluginBase<CopyPathPluginTypes> {
           await copyVaultPath(targetFile, this);
         },
         id: 'copy-vault-path',
-        name: 'Copy Path: Copy vault path for current file'
+        name: 'Copy vault path of focused item'
       });
     }
 
@@ -69,7 +69,7 @@ export class CopyPathPlugin extends PluginBase<CopyPathPluginTypes> {
           await copyFullPath(targetFile, this);
         },
         id: 'copy-full-path',
-        name: 'Copy Path: Copy full path for current file'
+        name: 'Copy full path of focused item'
       });
     }
   }
@@ -156,12 +156,8 @@ async function copyFullPath(
   }
 
   await navigator.clipboard.writeText(absolutePath);
-
-  // Enhanced notice with source indication
-  const isVaultRoot = file === plugin.app.vault.getRoot();
-  const sourceIndicator = isVaultRoot ? ' (vault root)' : '';
   // eslint-disable-next-line no-magic-numbers
-  new Notice(`Copied full path${sourceIndicator}:\n${absolutePath}`, 2000);
+  new Notice(`Copied full path:\n${absolutePath}`, 2000);
 }
 
 // Is normalized.
@@ -176,10 +172,6 @@ async function copyVaultPath(
   }
 
   await navigator.clipboard.writeText(vaultPath);
-
-  // Enhanced notice with source indication
-  const isVaultRoot = file === plugin.app.vault.getRoot();
-  const sourceIndicator = isVaultRoot ? ' (vault root)' : '';
   // eslint-disable-next-line no-magic-numbers
-  new Notice(`Copied vault path${sourceIndicator}:\n${vaultPath}`, 2000);
+  new Notice(`Copied vault path:\n${vaultPath}`, 2000);
 }
